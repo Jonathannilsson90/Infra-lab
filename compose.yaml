@@ -1,1 +1,25 @@
-#TODO
+services:
+
+
+  nginx-site1:
+    container_name: nginx-site1
+    hostname: "site1"
+    build:
+      context: ./site1
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+
+  nginx-site2:
+    container_name: nginx-site2
+    hostname: "site2"
+    build:
+      context: ./site2
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+
