@@ -1,0 +1,9 @@
+name: Deploy
+on: [push]
+jobs:
+    checkout_site1:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   uses: actions/checkout@v6
+            
