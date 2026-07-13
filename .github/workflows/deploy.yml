@@ -9,7 +9,7 @@ jobs:
                 uses: actions/checkout@v6
 
             -   name: docker_build
-                run: docker build -t site1 .
+                run: docker build -t site1 ./site1
             
             -   name: docker_run
                 run: docker run -d -p 8080:80 site1
