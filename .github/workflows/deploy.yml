@@ -8,6 +8,9 @@ jobs:
             -   name: checkout_site1
                 uses: actions/checkout@v6
 
-            -   name: print_helloWorld
-                run: echo "Hello World"
+            -   name: docker_build
+                run: docker build -t site1 .
+            
+            -   name: docker_run
+                run: docker run -d -p 8080:80 site1
             
