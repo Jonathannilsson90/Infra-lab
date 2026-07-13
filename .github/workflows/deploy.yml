@@ -13,4 +13,17 @@ jobs:
             
             -   name: docker_run
                 run: docker run -d -p 8080:80 site1
+
+
+    deploy_site2:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: checkout_site2
+                uses: actions/checkout@v6
+
+            -   name: docker_build
+                run: docker build -t site2 ./site2
             
+            -   name: docker_run
+                run: docker run -d -p 8081:80 site2          
