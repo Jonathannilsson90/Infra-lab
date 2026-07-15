@@ -14,6 +14,9 @@ jobs:
             -   name: docker_run
                 run: docker run -d -p 8080:80 site1
 
+            -   name: curl_test
+                run: curl --fail http://localhost:8080
+
 
     deploy_site2:
         runs-on: ubuntu-latest
