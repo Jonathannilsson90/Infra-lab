@@ -20,6 +20,11 @@ jobs:
                         echo "waiting..."
                         sleep 1
                         done
+            
+            -   name: Checks HMTL5
+                uses: Cyb3r-Jak3/html5validator-action@7.2.0
+                with:
+                    root: ./site1
                 
 
     deploy_site2:
@@ -41,3 +46,9 @@ jobs:
                         echo "waiting..."
                         sleep 1
                         done
+
+            -   name: Checks HTML5
+                uses: Cyb3r-Jak3/html5validator-action@7.2.0
+                with:
+                    root: ./site2
+            
