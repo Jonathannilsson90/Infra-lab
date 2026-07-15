@@ -31,6 +31,9 @@ jobs:
 
             -   name: docker_build
                 run: docker build -t site2 ./site2
+
+            -   name: docker_run
+                run: docker run -d -p 8081:80 site2
             
             -   name: Wait for container 2 to be healthy
                 run: |
