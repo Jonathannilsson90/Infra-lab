@@ -18,10 +18,18 @@ jobs:
 
             -   name: Wait for container 1 to be healthy
                 run: |
+                    count=0
                     until curl -sf http://localhost:8080 > /dev/null; do
                         echo "waiting..."
                         sleep 1
+                        count=$((count +1))
+
+                        if [ $count == 10 ]; then
+                        echo "Could not start container, check deployment settings for site1"
+                        exit 1
+                        fi
                         done
+                        echo "Container 1 is Healthy"
             
             -   name: Checks HMTL5
                 uses: Cyb3r-Jak3/html5validator-action@v7.2.0
@@ -44,10 +52,18 @@ jobs:
             
             -   name: Wait for container 2 to be healthy
                 run: |
+                    count=0
                     until curl -sf http://localhost:8081 > /dev/null; do
                         echo "waiting..."
                         sleep 1
+                        count=$((count +1))
+
+                        if [ $count == 10 ]; then
+                        echo "Could not start container, check deployment settings on site 2"
+                        exit 1
+                        fi
                         done
+                        echo "Container 2 is Healthy"
 
             -   name: Checks HTML5
                 uses: Cyb3r-Jak3/html5validator-action@v7.2.0
