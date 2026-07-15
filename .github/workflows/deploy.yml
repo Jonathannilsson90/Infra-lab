@@ -14,9 +14,13 @@ jobs:
             -   name: docker_run
                 run: docker run -d -p 8080:80 site1
 
-            -   name: curl_test
-                run: curl --fail http://localhost:8080
-
+            -   name: Wait for container 1 to be healthy
+                run: |
+                    until curl -sf http://localhost:8080 > /dev/null; do
+                        echo "waiting..."
+                        sleep 1
+                        done
+                
 
     deploy_site2:
         runs-on: ubuntu-latest
@@ -28,5 +32,9 @@ jobs:
             -   name: docker_build
                 run: docker build -t site2 ./site2
             
-            -   name: docker_run
-                run: docker run -d -p 8081:80 site2          
+            -   name: Wait for container 2 to be healthy
+                run: |
+                    until curl -sf http://localhost:8081 > /dev/null; do
+                        echo "waiting..."
+                        sleep 1
+                        done
