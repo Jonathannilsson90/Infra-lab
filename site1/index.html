@@ -1,11 +1,312 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Djuphavspatrull — rörlig ubåt</title>
+<style>
+  :root{
+    --abyss-top: #051923;
+    --abyss-bottom: #003554;
+    --hull: #52655f;
+    --hull-dark: #384944;
+    --hull-light: #6b7d76;
+    --brass: #c4893f;
+    --glow: #4ecdc4;
+    --glow-dim: rgba(78,205,196,0.35);
+    --sand: #021b26;
+    --foam: #d7f4f0;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: linear-gradient(to bottom, var(--abyss-top) 0%, var(--abyss-bottom) 55%, var(--sand) 100%);
+    overflow:hidden;
+    font-family: 'Courier New', monospace;
+  }
+  .scene{
+    position:relative;
+    width:100vw; height:100vh;
+    min-height: 480px;
+  }
+
+  /* ---------- ljusstrålar ---------- */
+  .rays{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(115deg, transparent 30%, rgba(180,230,230,0.05) 35%, transparent 42%),
+      linear-gradient(105deg, transparent 55%, rgba(180,230,230,0.04) 60%, transparent 68%);
+    animation: shimmer 9s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes shimmer{
+    0%,100%{ opacity:0.6; transform: translateX(0); }
+    50%{ opacity:1; transform: translateX(2%); }
+  }
+
+  /* ---------- rubrik / HUD ---------- */
+  .hud{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding: 28px 34px;
+    color: var(--foam);
+    z-index: 20;
+    pointer-events:none;
+  }
+  .hud h1{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:700;
+    letter-spacing: 0.06em;
+    font-size: clamp(20px, 3vw, 34px);
+    margin:0;
+    color: var(--foam);
+    text-shadow: 0 0 18px rgba(78,205,196,0.35);
+  }
+  .hud .sub{
+    margin-top:6px;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--glow);
+    opacity:0.85;
+  }
+  .depth{
+    text-align:right;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--glow);
+    line-height:1.6;
+    opacity:0.9;
+  }
+  .depth b{ color: var(--foam); font-size:15px; letter-spacing:0.05em; }
+
+  /* ---------- sonarpingar ---------- */
+  .sonar{
+    position:absolute;
+    border-radius:50%;
+    border: 1.5px solid var(--glow-dim);
+    left:50%; top:50%;
+    transform: translate(-50%,-50%);
+    animation: ping 4s ease-out infinite;
+    pointer-events:none;
+  }
+  .sonar.d2{ animation-delay: 1.3s; }
+  .sonar.d3{ animation-delay: 2.6s; }
+  @keyframes ping{
+    0%{ width:20px; height:20px; opacity:0.9; border-color: var(--glow); }
+    100%{ width:900px; height:900px; opacity:0; border-color: var(--glow-dim); }
+  }
+
+  /* ---------- ubåtsbana (bobbing + horisontell färd) ---------- */
+  .voyage{
+    position:absolute;
+    top:38%;
+    left:0;
+    width:100%;
+    animation: cruise 22s linear infinite;
+  }
+  @keyframes cruise{
+    0%   { transform: translateX(-30vw); }
+    100% { transform: translateX(130vw); }
+  }
+  .bob{
+    animation: bob 3.6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes bob{
+    0%,100%{ transform: translateY(-10px) rotate(-1.5deg); }
+    50%{ transform: translateY(12px) rotate(1.5deg); }
+  }
+
+  .sub-wrap{ width: min(38vw, 420px); filter: drop-shadow(0 18px 26px rgba(0,0,0,0.55)); }
+
+  .porthole-glow{ animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow{
+    0%,100%{ opacity:0.55; }
+    50%{ opacity:1; }
+  }
+
+  .prop{
+    transform-origin: 8px 60px;
+    animation: spin 0.5s linear infinite;
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+
+  /* ---------- bubblor ---------- */
+  .bubbles{ position:absolute; inset:0; overflow:hidden; z-index:5; }
+  .bubble{
+    position:absolute;
+    bottom:-40px;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(215,244,240,0.15) 70%);
+    border-radius:50%;
+    animation-name: rise;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
+    opacity:0.8;
+  }
+  @keyframes rise{
+    0%{ transform: translateY(0) translateX(0); opacity:0.8; }
+    85%{ opacity:0.7; }
+    100%{ transform: translateY(-115vh) translateX(20px); opacity:0; }
+  }
+
+  /* ---------- havsbotten siluetter ---------- */
+  .floor{
+    position:absolute; bottom:0; left:0; width:100%; height:22%;
+    z-index:8;
+  }
+  .kelp{
+    position:absolute; bottom:0;
+    width: 14px;
+    background: linear-gradient(to top, #032430, #0a5040);
+    border-radius: 40px 40px 0 0;
+    transform-origin: bottom center;
+    animation: sway 4.5s ease-in-out infinite;
+  }
+  @keyframes sway{
+    0%,100%{ transform: rotate(-6deg); }
+    50%{ transform: rotate(6deg); }
+  }
+
+  .credit{
+    position:absolute; bottom:10px; right:16px;
+    color: rgba(215,244,240,0.35);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    z-index: 20;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .voyage, .bob, .prop, .bubble, .kelp, .rays, .sonar{ animation: none !important; }
+    .voyage{ left: 50%; transform: translateX(-50%); }
+  }
+</style>
 </head>
 <body>
-    <h1>Site1</h1>
+<div class="scene">
+
+  <div class="rays"></div>
+
+  <div class="sonar"></div>
+  <div class="sonar d2"></div>
+  <div class="sonar d3"></div>
+
+  <div class="hud">
+    <div>
+      <h1>Djuphavspatrull</h1>
+      <div class="sub">Ubåt i tyst gång</div>
+    </div>
+    <div class="depth">
+      DJUP <b>240 m</b><br>
+      KURS <b>087°</b>
+    </div>
+  </div>
+
+  <div class="voyage">
+    <div class="bob sub-wrap">
+      <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+        <!-- skrov -->
+        <ellipse cx="150" cy="65" rx="120" ry="34" fill="#384944"/>
+        <ellipse cx="150" cy="60" rx="118" ry="28" fill="#52655f"/>
+        <ellipse cx="150" cy="55" rx="110" ry="18" fill="#6b7d76" opacity="0.55"/>
+
+        <!-- torn -->
+        <rect x="120" y="10" width="55" height="40" rx="8" fill="#384944"/>
+        <rect x="126" y="14" width="43" height="30" rx="6" fill="#52655f"/>
+        <!-- periskop -->
+        <rect x="145" y="-14" width="6" height="28" fill="#2a3733"/>
+        <rect x="140" y="-18" width="16" height="7" rx="2" fill="#2a3733"/>
+
+        <!-- hyttfönster torn -->
+        <circle cx="148" cy="30" r="6" fill="#0d2b31" stroke="#c4893f" stroke-width="2"/>
+        <circle cx="148" cy="30" r="3" class="porthole-glow" fill="#4ecdc4"/>
+
+        <!-- nithuvuden -->
+        <g fill="#2a3733" opacity="0.5">
+          <circle cx="60" cy="42" r="2"/>
+          <circle cx="60" cy="80" r="2"/>
+          <circle cx="240" cy="42" r="2"/>
+          <circle cx="240" cy="80" r="2"/>
+        </g>
+
+        <!-- portöglar med mässingsram -->
+        <g>
+          <circle cx="95" cy="62" r="11" fill="#0d2b31" stroke="#c4893f" stroke-width="3"/>
+          <circle cx="95" cy="62" r="5.5" class="porthole-glow" fill="#4ecdc4"/>
+        </g>
+        <g>
+          <circle cx="150" cy="66" r="11" fill="#0d2b31" stroke="#c4893f" stroke-width="3"/>
+          <circle cx="150" cy="66" r="5.5" class="porthole-glow" fill="#4ecdc4" style="animation-delay:.5s"/>
+        </g>
+        <g>
+          <circle cx="205" cy="62" r="11" fill="#0d2b31" stroke="#c4893f" stroke-width="3"/>
+          <circle cx="205" cy="62" r="5.5" class="porthole-glow" fill="#4ecdc4" style="animation-delay:1s"/>
+        </g>
+
+        <!-- för -->
+        <path d="M270 45 Q300 55 270 85 Z" fill="#52655f"/>
+
+        <!-- akter + propeller -->
+        <path d="M30 50 Q5 60 30 78 Z" fill="#384944"/>
+        <g class="prop" stroke="#c4893f" stroke-width="3" stroke-linecap="round">
+          <line x1="8" y1="60" x2="8" y2="40"/>
+          <line x1="8" y1="60" x2="8" y2="80"/>
+          <line x1="8" y1="60" x2="-8" y2="60"/>
+        </g>
+
+        <!-- roder -->
+        <rect x="230" y="90" width="6" height="26" fill="#2a3733"/>
+        <rect x="140" y="90" width="6" height="26" fill="#2a3733"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="bubbles"></div>
+
+  <div class="floor">
+    <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1000 100">
+      <path d="M0,60 Q120,20 260,55 T520,50 T760,65 T1000,45 L1000,100 L0,100 Z" fill="#021b26"/>
+    </svg>
+  </div>
+
+  <div class="credit">sonar aktivt</div>
+</div>
+
+<script>
+  // Placera kelp slumpmässigt längs botten
+  const floor = document.querySelector('.floor');
+  const kelpCount = 14;
+  for(let i=0;i<kelpCount;i++){
+    const k = document.createElement('div');
+    k.className = 'kelp';
+    const h = 40 + Math.random()*70;
+    k.style.height = h + 'px';
+    k.style.left = (Math.random()*100) + '%';
+    k.style.animationDuration = (3.5 + Math.random()*3) + 's';
+    k.style.animationDelay = (Math.random()*3) + 's';
+    floor.appendChild(k);
+  }
+
+  // Generera bubblor kontinuerligt
+  const bubbleLayer = document.querySelector('.bubbles');
+  function spawnBubble(){
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 4 + Math.random()*14;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = (Math.random()*100) + '%';
+    const dur = 6 + Math.random()*8;
+    b.style.animationDuration = dur + 's';
+    b.style.animationDelay = (Math.random()*2) + 's';
+    bubbleLayer.appendChild(b);
+    setTimeout(()=> b.remove(), (dur+2)*1000);
+  }
+  for(let i=0;i<25;i++) setTimeout(spawnBubble, i*300);
+  setInterval(spawnBubble, 500);
+</script>
 </body>
 </html>
