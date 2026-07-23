@@ -5,6 +5,7 @@ on:
 jobs:
     deploy_site1:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
 
         steps:
             -   name: checkout_site1
@@ -39,6 +40,7 @@ jobs:
 
     deploy_site2:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
 
         steps:
             -   name: checkout_site2
@@ -73,6 +75,7 @@ jobs:
     Test-Tailscale-connectivity:
         needs: [deploy_site1, deploy_site2]
         runs-on: ubuntu-latest
+        timeout-minutes: 2
         steps:
             -   name: Tailscale ping test
                 uses: tailscale/github-action@v4
