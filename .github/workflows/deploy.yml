@@ -72,7 +72,7 @@ jobs:
                 with:
                     root: ./site2
 
-    Test-Tailscale-connectivity:
+   Deploy:
         needs: [deploy_site1, deploy_site2]
         runs-on: ubuntu-latest
         timeout-minutes: 2
@@ -84,3 +84,23 @@ jobs:
                     oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
                     tags: tag:ci
                     ping: ${{ secrets.TAILSCALE_IP }}
+            
+            -   name: Deploy via SSH
+                uses: appleboy/sh-action@v1
+                with:
+                    host: ${{ secrets.TAILSCALE_IP }}
+                    username: ${{ secrets.SSH_USER }}
+                    key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    script: pwd
+
+
+
+
+
+
+
+
+    
+        
+           
+
