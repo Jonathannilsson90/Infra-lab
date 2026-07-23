@@ -1,81 +1,13 @@
 name: Deploy
 on:
-    pull_request:
+    push:
         branches: ["main"]
 jobs:
-    deploy_site1:
-        runs-on: ubuntu-latest
-        timeout-minutes: 5
-
-        steps:
-            -   name: checkout_site1
-                uses: actions/checkout@v6
-
-            -   name: docker_build
-                run: docker build -t site1 ./site1
-            
-            -   name: docker_run
-                run: docker run -d -p 8080:80 site1
-
-            -   name: Wait for container 1 to be healthy
-                run: |
-                    count=0
-                    until curl -sf http://localhost:8080 > /dev/null; do
-                        echo "waiting..."
-                        sleep 1
-                        count=$((count +1))
-
-                        if [ $count == 10 ]; then
-                        echo "Could not start container, check deployment settings for site1"
-                        exit 1
-                        fi
-                        done
-                        echo "Container 1 is Healthy"
-            
-            -   name: Checks HMTL5
-                uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-                with:
-                    root: ./site1
-                
-
-    deploy_site2:
-        runs-on: ubuntu-latest
-        timeout-minutes: 5
-
-        steps:
-            -   name: checkout_site2
-                uses: actions/checkout@v6
-
-            -   name: docker_build
-                run: docker build -t site2 ./site2
-
-            -   name: docker_run
-                run: docker run -d -p 8081:80 site2
-            
-            -   name: Wait for container 2 to be healthy
-                run: |
-                    count=0
-                    until curl -sf http://localhost:8081 > /dev/null; do
-                        echo "waiting..."
-                        sleep 1
-                        count=$((count +1))
-
-                        if [ $count == 10 ]; then
-                        echo "Could not start container, check deployment settings on site 2"
-                        exit 1
-                        fi
-                        done
-                        echo "Container 2 is Healthy"
-
-            -   name: Checks HTML5
-                uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-                with:
-                    root: ./site2
-
     Deploy:
-        needs: [deploy_site1, deploy_site2]
+        
         runs-on: ubuntu-latest
-        timeout-minutes: 2
+        timeout-minutes: 10
+        
         steps:
             -   name: Tailscale ping test
                 uses: tailscale/github-action@v4
@@ -91,16 +23,10 @@ jobs:
                     host: ${{ secrets.TAILSCALE_IP }}
                     username: ${{ secrets.SSH_USER }}
                     key: ${{ secrets.SSH_PRIVATE_KEY }}
-                    script: pwd
-
-
-
-
-
-
-
-
-    
-        
-           
-
+                    script: |
+                       cd ${{ secrets.PATH }}
+                       git pull
+                       docker compose build nginx-site1
+                       docker compose up -d nginx-site1
+                       docker compose build nginx-site2
+                       docker compose up -d nginx-site2
