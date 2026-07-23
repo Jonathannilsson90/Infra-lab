@@ -86,7 +86,7 @@ jobs:
                     ping: ${{ secrets.TAILSCALE_IP }}
             
             -   name: Deploy via SSH
-                uses: appleboy/sh-action@v1
+                uses: appleboy/ssh-action@v1
                 with:
                     host: ${{ secrets.TAILSCALE_IP }}
                     username: ${{ secrets.SSH_USER }}
