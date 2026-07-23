@@ -69,4 +69,15 @@ jobs:
                 uses: Cyb3r-Jak3/html5validator-action@v7.2.0
                 with:
                     root: ./site2
-            
+
+    Test-Tailscale-connectivity:
+        needs: [deploy_site1, deploy_site2]
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Tailscale ping test
+                uses: tailscale/github-action@v4
+                with:
+                    oauth-client-id: ${{ secrets.TAILSCALE_CLIENT_ID }}
+                    oauth-secret: ${{ secrets.TAILSCALE_CLIENT_SECRET }}
+                    tags: tag:ci
+                    ping: ${{ secrets.TAILSCALE_IP }}
