@@ -75,6 +75,6 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Tailscale ping test
-                uses: tailscale/github-actions@v4
+                uses: tailscale/github-action@v4
                 with:
                     ping: ${{ secrets.TAILSCALE_IP }}
