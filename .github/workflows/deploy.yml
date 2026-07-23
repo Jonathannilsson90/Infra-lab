@@ -18,13 +18,13 @@ jobs:
                     ping: ${{ secrets.TAILSCALE_IP }}
             
             -   name: Deploy via SSH
-                uses: appleboy/ssh-action@v1
+                uses: appleboy/ssh-action@1.2.5
                 with:
                     host: ${{ secrets.TAILSCALE_IP }}
                     username: ${{ secrets.SSH_USER }}
                     key: ${{ secrets.SSH_PRIVATE_KEY }}
                     script: |
-                       cd ${{ secrets.PATH }}
+                       cd ${{ secrets.DEPLOY_PATH }}
                        git pull
                        docker compose build nginx-site1
                        docker compose up -d nginx-site1
