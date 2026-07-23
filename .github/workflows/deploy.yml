@@ -72,7 +72,7 @@ jobs:
                 with:
                     root: ./site2
 
-   Deploy:
+    Deploy:
         needs: [deploy_site1, deploy_site2]
         runs-on: ubuntu-latest
         timeout-minutes: 2
